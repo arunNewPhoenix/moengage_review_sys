@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Brewery Search</title>
+</head>
+<body>
+
+<h2>Brewery Search</h2>
+
+<form method="get" action="{% url 'brewery_search' %}">
+    <label for="by_city">City:</label>
+    <input type="text" name="by_city" value="{{ request.GET.by_city }}">
+    
+    <label for="by_name">Name:</label>
+    <input type="text" name="by_name" value="{{ request.GET.by_name }}">
+    
+    <label for="by_type">Type:</label>
+    <input type="text" name="by_type" value="{{ request.GET.by_type }}">
+
+    <button type="submit">Search</button>
+</form>
+
+
+{% if breweries %}
+    <h3>Search Results:</h3>
+    <ul>
+        {% for brewery in breweries %}
+            <li>
+                <strong>{{ brewery.name }}</strong><br>
+                Address: {{ brewery.address_1 }}<br>
+                Phone: {{ brewery.phone }}<br>
+                Website: <a href="{{ brewery.website }}" target="_blank">{{ brewery.website_url }}</a><br>
+                Current Rating: {{ brewery.current_rating }}<br>
+                State: {{ brewery.state }}, City: {{ brewery.city }}
+                <br>
+                <!-- Display review form for each brewery -->
+                <form method="post" action="{% url 'add_review' brewery_id=brewery.id %}">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit">Submit Review</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+    {% elif error_message %}
+    <p>{{ error_message }}</p>
+{% endif %}
+
+</body>
+</html>
