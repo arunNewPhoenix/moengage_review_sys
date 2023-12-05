@@ -11,6 +11,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.decorators import login_required
 from .forms import ReviewForm
+from django.contrib import messages
 import requests
 import json
 
@@ -89,7 +90,6 @@ def add_review(request, brewery_id):
 
 ###########################################################################################################
 
-
 @csrf_exempt
 def signup(request):
     if request.method == 'POST':
@@ -97,27 +97,27 @@ def signup(request):
         if form.is_valid():
             # Save the user to the database
             user = form.save()
-            
-            # Log the user in
-            login(request, user)
+
+            # Log the user in using Django's auth_login
+            user = authenticate(request, username=form.cleaned_data['username'], password=form.cleaned_data['password1'])
+            auth_login(request, user)
 
             # Redirect to the home page or any other desired page
-            return redirect('home')  # Replace 'home' with the name of your home page URL pattern
+            return redirect('brewery_search')  # Replace 'home' with the name of your home page URL pattern
     else:
         form = UserCreationForm()
 
     return render(request, 'brewery/signup.htm', {'form': form})
 
 @csrf_exempt
-def login(request):
+def custom_login(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, request.POST)
         if form.is_valid():
-            # Log the user in
-            auth_login(request, form.get_user())
-            
-            # Redirect to the home page or any other desired page
-            return redirect('home')  # Replace 'home' with the name of your home page URL pattern
+            user = form.get_user()
+            auth_login(request, user)
+            messages.success(request, 'Login successful.')
+            return redirect('brewery_search')  # Redirect to the desired page after login
     else:
         form = AuthenticationForm()
 
